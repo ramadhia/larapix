@@ -1,11 +1,22 @@
 {
     "name": "mhpix/larapix",
-    "type": "library",
     "authors": [
         {
             "name": "Rafli Ramadhia",
             "email": "rafli.ramadhia@gmail.com"
         }
     ],
-    "require": {}
+    "autoload": {
+        "psr-4": {
+            "Larapix\\": "src/"
+        }
+    },
+    "require": {},
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Larapix\\App\Providers\\LarapixServiceProvider"
+            ]
+        }
+    }
 }
