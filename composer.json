@@ -1,0 +1,11 @@
+{
+    "name": "mhpix/larapix",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Rafli Ramadhia",
+            "email": "rafli.ramadhia@gmail.com"
+        }
+    ],
+    "require": {}
+}
