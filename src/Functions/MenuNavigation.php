@@ -1,0 +1,118 @@
+<?php
+namespace Larapix\Functions;
+
+
+use Auth;
+use Request;
+
+use Models\Routes;
+use Models\RouteRole;
+use Larapix\Functions\Larapix;
+
+trait MenuNavigation{
+
+    public static function mainMenu(){
+
+        $prefix     = Request::route()->getPrefix().'/';
+        $Active     = ( ('/'.Larapix::getURI().'/') == $prefix ) ? 'class="active"' : '';
+        $userRole   = Auth::user()->role_id;
+        $role       = RouteRole::where('role_id', $userRole)->first();
+        $roleId     = explode(',',$role->routes_id);
+        $menu       = Routes::with('children')->active()
+                    ->where('parent_id',0)
+                    ->where('type',1)
+                    ->whereIn('id', $roleId )
+                    ->orderBy('sort', 'asc')
+                    ->get();
+
+        $nav        = '<li><a href="'.url($prefix).'" '.$Active.'><i class="icon-home3"></i><span>Dashboard</span></a></li>';
+        foreach($menu as $Routes){
+
+            $urlMenu  = $prefix.''.$Routes->alias_route;
+            $Active   = ( Larapix::Routes() == $Routes->alias_route ) ? 'class="active"' : '';
+            if($Routes->children->count() > 0):
+                $nav .= "\r".'<li>';
+                $nav .= '<a href="#'.$Routes->nm_route.'" data-toggle="collapse" class="collapsed" '.$Active.'>';
+                $nav .= '<i class="'.$Routes->icon.'"></i><span>'.$Routes->nm_route.'</span><i class="icon-submenu lnr lnr-chevron-left"></i>';
+                // $nav .= '<span>'.$Routes->nm_route.'</span>';
+                // $nav .= '<i class="icon-submenu lnr lnr-chevron-left"></i>';
+                $nav .= '</a>';
+                $nav .= '<div id="'.$Routes->nm_route.'" class="collapse">';
+                $nav .= '<ul class="nav">';
+                $nav .= '<li><a href="'.url($urlMenu).'" '.$Active.'>';
+                $nav .= '<i class="'.$Routes->icon.'"></i>List '.$Routes->nm_route.'</a></li>';
+                foreach($Routes->children as $subRoutes){
+                    // Check jika sub menu tidak terdaftar di Role ID
+                    if(in_array($subRoutes->id, $roleId) && ($subRoutes->tampil) == 1):
+                        $urlMenuParent = $prefix.$Routes->alias_route.'/'.$subRoutes->alias_route;
+                        $subActive     = ( Larapix::Routes() == $subRoutes->alias_route ) ? 'class="active"' : '';
+                        $nav .='<li><a href="'.url($urlMenuParent).'" '.$subActive.'><i class="'.$subRoutes->icon.'"></i>'.$subRoutes->nm_route.'</a></li>';
+                    endif;
+
+                }
+
+                $nav .= '</ul>';
+                $nav .= '</div>';
+                $nav .= '</li>';
+            else :
+                $nav .= "\r\t\t\t".'<li>
+                <a '.$Active.' href="'.url($urlMenu).'">
+                <i class="'.$Routes->icon.'"></i>
+                <span>'.$Routes->nm_route.'</span>
+                </a>
+                </li>';
+            endif;
+
+        }
+        $html   = str_replace("><", ">\r\n<", $nav);
+        return $html;
+    }
+
+    public static function coreMenu(){
+
+        $prefix     = Request::route()->getPrefix().'/';
+        $userRole   = Auth::user()->role_id;
+        $role       = RouteRole::where('role_id', $userRole)->first();
+        $roleId     = explode(',',$role->routes_id);
+        $menu       = Routes::with('children')->active()
+                      ->where('parent_id',0)
+                      ->where('type',0)
+                      ->whereIn('id', $roleId )
+                      ->get();
+
+        $nav  = NULL;
+        $nav .= '<li style="padding:15px 0px 0"><i data-toggle="tooltip" data-placement="right" data-original-title="Developer" class="icon-cog2"></i><span style="padding-left:10px;" data-i18n="nav.category.support">Developer</span>';
+        foreach($menu as $Routes){
+            $urlMenu  = $prefix.''.$Routes->alias_route;
+            $Active   = ( Larapix::Routes() == $Routes->alias_route ) ? 'class="active"' : '';
+            if($Routes->children->count() > 0):
+                $nav .= "\r\t\t\t".'<li class="nav-item">
+                <a href="'.url($urlMenu).'"><i class="'.$Routes->icon.'"></i>
+                <span>'.$Routes->nm_route.'</span></a>
+                <div id="subPages" class="collapse ">
+                <ul class="nav">';
+                $nav .='<li><a href="'.url($urlMenu).'" '.$Active.'>'.$Routes->nm_route.'</a></li>';
+                foreach($Routes->children as $subRoutes){
+
+                    if(in_array($subRoutes->id, $roleId) && ($subRoutes->tampil) == 1):
+                        $urlMenuParent = $prefix.$Routes->alias_route.'/'.$subRoutes->alias_route;
+                        $subActive     = ( Larapix::Routes() == $subRoutes->alias_route ) ? 'class="active"' : '';
+                        $nav .='<li><a href="'.url($urlMenuParent).'" '.$subActive.'><i class="'.$subRoutes->icon.'"></i>'.$subRoutes->nm_route.'</a></li>';
+                    endif;
+                }
+                $nav .='</ul></div></li>';
+            else :
+                $nav .= "\r\t\t\t".'<li>
+                <a '.$Active.' href="'.url($urlMenu).'">
+                <i class="'.$Routes->icon.'"></i>
+                <span>'.$Routes->nm_route.'</span>
+                </a>
+                </li>';
+            endif;
+          }
+
+        $html   = str_replace("><", ">\r\n<", $nav);
+        return $html;
+    }
+
+}
