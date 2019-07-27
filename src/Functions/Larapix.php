@@ -5,6 +5,7 @@ namespace Larapix\Functions;
 use Auth;
 use Route;
 use Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
 
 use Models\Routes;
@@ -21,9 +22,10 @@ class Larapix
      *
      * @return string
      */
+
     public static function titleHeader(){
         $getRoute    = explode('/', self::getURI());
-        $getMenu     = Routes::where('alias_route','=', self::Routes() )->first();
+        $getMenu     = Routes::where('alias_route', self::routeIsExists() )->first();
         if(in_array('{id}', $getRoute)):
             $arr      = array_pop($getRoute);
             $endRoute = end($getRoute);
@@ -52,7 +54,7 @@ class Larapix
         }
     }
 
-    public static function breadcrumb(){
+    public static function breadcrumb( $tag = 'ul' ){
         $route     = str_replace('-', ' ', self::getURI());
         $getRoute  = explode('/', $route);
         if(in_array('{id}', $getRoute)):
@@ -61,68 +63,103 @@ class Larapix
         else:
             $endRoute   = end($getRoute);
         endif;
-        $getMenu   = Routes::where('alias_route','=', $endRoute )->first();
+        $getMenu   = Routes::where('alias_route', $endRoute )->first();
         $count     = count($getRoute);
-        $breadcrumb = '<ol class="breadcrumb">';
+        $breadcrumb = '<'.$tag.' class="breadcrumb">';
         for($i=0; $i<$count; $i++){
-            $breadcrumb .= '<li class="breadcrumb-item">'.ucfirst($getRoute[$i]).'</li>';
+            $iconHome   = ( $i == 0 ) ? '<i class="icon-home2 position-left"></i>' : '';
+            $named      = ( $i == 0 ) ? 'Beranda' : $getRoute[$i];
+            $breadcrumb .= '<li>'.$iconHome.''.ucfirst($named).'</li>';
         }
-        $breadcrumb .= '</ol>';
+        $breadcrumb .= '</'.$tag.'>';
         return $breadcrumb;
     }
 
-    public static function createController($foo,$bar, $Boolean){
+    public static function createController($dirController, $nameController, $methodPost = true){
         date_default_timezone_set("Asia/Jakarta");
-        $dir    = self::remSpace($foo);
-        $dir2   = str_replace( ['\\', '/'], '.',self::remSpace($foo));
-        $file   = self::remSpace($bar);
-        $tggl   = date("Y/m/d H:i:s");
-        $Folder = self::path().'/App/Controllers/BackEnd/'.$dir;
+        $today          = date("Y/m/d H:i:s");
+        $dirController  = Str::studly($dirController);
+        $dirView        = str_replace( ['\\', '/'], '.', $dirController);
+        $nameController = Str::camel( $nameController );
+        $pathController = app_path('Http/Controllers/BackEnd/'.$dirController);
 
-        if(!file_exists($Folder)) {
-            mkdir($Folder, 0755, true);
+        if(!file_exists($pathController)) {
+            mkdir($pathController, 0755, true);
         }
-        $c_post     = 'public function post(){
+        $functionPost   = 'public function post(){
         /* INSERT YOUR POST METHOD HERE */
 
         }';
-        if($Boolean === TRUE){
-            $methodPost = $c_post;
-        }elseif($Boolean === FALSE){
+        if($methodPost){
+            $methodPost = $functionPost;
+        }elseif($methodPost === FALSE){
             $methodPost = '';
         }else{
-            $methodPost = 'public function '.$Boolean.'(){
+            $methodPost = 'public function '.$methodPost.'(){
             /* INSERT YOUR POST METHOD HERE */
 
             }';
         }
-        $createFile     = $Folder.'/'.$file.'Controller.php';
-        $nm_Controller  = str_replace('/','\\', $dir);
-        $content        = '';
+        $createFile     = $pathController.'/'.$nameController.'Controller.php';
+        $namespace      = str_replace('/','\\', $dirController);
+        $content        = '<?php
+namespace Controllers\BackEnd\\'.$namespace.';
+/*
+| Name Controller    : '.$nameController.'Controller
+| Controller Created : '.$today.'
+|
+*/
+use Illuminate\Http\Request;
+
+class '.$nameController.'Controller
+{
+    public function index(){
+        return view(\'BackEnd.requires.'.$dirView.'.'.$nameController.'\');
+    }
+
+    '.$methodPost.'
+    /* Please DON\'T DELETE THIS COMMENT */
+    /* INSERT HERE */
+}';
         if(file_exists($createFile)){
-            return 'Sorry, your Controller already exists.';
+            return response()->json([
+                'error' => true,
+                'message' => 'Sorry, your Controller already exists.',
+                'path' => $pathController,
+                'file' => $createFile
+            ], 500);
         } else {
             $fp   = fopen($createFile,"wb");
             if (fwrite($fp, $content) === FALSE) {
-                return "Cannot write to file ($createFile)";
-                exit;
+                return response()->json([
+                    'error' => true,
+                    'message' => 'Error, Cannot write to file',
+                    'path' => $pathController,
+                    'file' => $createFile
+                ], 500);
             }
-            return TRUE;
+            return response()->json([
+                'error' => false,
+                'message' => 'Success create Controller',
+                'path' => $pathController,
+                'file' => $createFile
+            ]);
             fclose($fp);
         }
     }
 
-    public static function createBlade($dir,$file){
+    public static function createBlade($dirView, $nameView){
         date_default_timezone_set("Asia/Jakarta");
-        $tggl = date("Y/m/d H:i:s");
-        $Folder = resource_path().'/views/BackEnd/requires/'.self::remSpace($dir);
+        $today  = date("Y/m/d H:i:s");
+        $pathView   = resource_path().'/views/BackEnd/requires/'.Str::studly($dirView);
+        $nameView   = Str::camel( Str::studly($nameView) );
 
-        if(!file_exists($Folder)) {
-            mkdir($Folder, 0755, true);
+        if(!file_exists($pathView)) {
+            mkdir($pathView, 0755, true);
         }
 
-        $createFile = $Folder.'/'.self::remSpace($file).'.blade.php';
-        $content = '{{-- This Blade has been automatically generated for use by Web Dev , DATE CREATED : '.$tggl.' --}}
+        $createFile = $pathView.'/'.$nameView.'.blade.php';
+        $content    = '{{-- This Blade has been automatically generated for use by Web Dev , DATE CREATED : '.$today.' --}}
         @extends(\'BackEnd.layouts.body\')
         @push(\'styles\')
         {{-- Insert your Stylesheet Here --}}
@@ -137,14 +174,28 @@ class Larapix
         @endpush
         ';
         if(file_exists($createFile)){
-            return 'Sorry, your Blade already exists.';
+            return response()->json([
+                'error' => true,
+                'message' => 'Sorry, your Blade already exists',
+                'path' => $pathView,
+                'file' => $createFile
+            ], 500);
         } else {
             $fp   = fopen($createFile,"wb");
             if (fwrite($fp,str_replace("  ",'',$content)) === FALSE) {
-
-                return "Cannot write to file ($createFile)";
+                return response()->json([
+                    'error' => ture,
+                    'message' => 'Cannot write to file',
+                    'path' => $pathView,
+                    'file' => $createFile
+                ],500);
             }
-            return true;
+            return response()->json([
+                'error' => false,
+                'message' => 'Sorry, your Blade already exists',
+                'path' => $pathView,
+                'file' => $createFile
+            ]);
             fclose($fp);
         }
     }
@@ -153,10 +204,10 @@ class Larapix
         $val    = (!$foo) ? self::currentRoute() : $foo ;
         $routes = Routes::where('alias_route','=', $val)->first();
         if($routes){
-            if($routes->id_parent == 0){
+            if($routes->parent_id == 0){
                 $getController = $routes->nm_route.'/index'.self::remSpace($routes->nm_route).'Controller';
             }else{
-                $parent        = Routes::where('id','=',$routes->id_parent)->first();
+                $parent        = Routes::where('id','=',$routes->parent_id)->first();
                 $getController = $parent->nm_route.'/'.self::remSpace($routes->nm_route).'Controller';
             }
         } else {
