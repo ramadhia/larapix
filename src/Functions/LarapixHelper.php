@@ -22,12 +22,10 @@ trait LarapixHelper{
     public static function routeIsExists(){
         $arr		= explode('/',self::getURI());
         $URI		= '';
-
-        return collect($arr);
         if ( isset($arr[1]) ) :
             $ROOT	= $arr[1];
             $route	= Routes::where('alias_route', $ROOT)->first();
-            $parentR= Routes::where('id_parent', $route->id)->count();
+            $parentR= Routes::where('parent_id', $route->id)->count();
             if ($parentR >= 1):
                 if ( isset($arr[2]) ):
                     $PARENT = $arr[2];
@@ -40,7 +38,7 @@ trait LarapixHelper{
                 $URI = $ROOT;
             endif;
         endif;
-        return $arr;
+        return $URI;
     }
 
     public static function currentRoute(){
