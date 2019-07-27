@@ -43,7 +43,7 @@ trait LarapixRoute{
                     Str::studly($Route->nm_route),
                     Str::studly($Route->nm_route),
                     $Route->bread,
-                    $Route->id_parent
+                    $Route->parent_id
                 );
                 /* === PARENT ROUTING ============*/
                 foreach($Route->children as $subRoute){
@@ -52,7 +52,7 @@ trait LarapixRoute{
                         Str::studly($Route->nm_route).'\\'.Str::studly($subRoute->nm_route),
                         Str::studly($subRoute->nm_route),
                         $subRoute->bread,
-                        $subRoute->id_parent
+                        $subRoute->parent_id
                     );
                 }
                 /* === PARENT ROUTING ============*/
@@ -62,7 +62,7 @@ trait LarapixRoute{
                     Str::studly($Route->nm_route),
                     Str::studly($Route->nm_route),
                     $Route->bread,
-                    $Route->id_parent
+                    $Route->parent_id
                 );
             }
             /* ===== ROUTING ===================*/
