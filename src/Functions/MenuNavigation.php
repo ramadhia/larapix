@@ -37,6 +37,7 @@ trait MenuNavigation{
                 // $nav .= '<span>'.$Routes->nm_route.'</span>';
                 // $nav .= '<i class="icon-submenu lnr lnr-chevron-left"></i>';
                 $nav .= '</a>';
+                // $nav .= '<div id="'.$Routes->nm_route.'" class="collapse">';
                 $nav .= '<ul>';
                 // $nav .= '<li><a href="'.url($urlMenu).'" '.$Active.'>';
                 // $nav .= '<i class="'.$Routes->icon.'"></i>List '.$Routes->nm_route.'</a></li>';
@@ -51,6 +52,7 @@ trait MenuNavigation{
                 }
 
                 $nav .= '</ul>';
+                $nav .= '';
                 $nav .= '</li>';
             else :
                 $nav .= "\r\t\t\t".'<li '.$Active.'>
