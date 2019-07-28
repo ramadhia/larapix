@@ -29,34 +29,32 @@ trait MenuNavigation{
         foreach($menu as $Routes){
 
             $urlMenu  = $prefix.''.$Routes->alias_route;
-            $Active   = ( Larapix::Routes() == $Routes->alias_route ) ? 'class="active"' : '';
+            $Active   = ( Larapix::routeIsExists() == $Routes->alias_route ) ? 'class="active"' : '';
             if($Routes->children->count() > 0):
-                $nav .= "\r".'<li>';
-                $nav .= '<a href="#'.$Routes->nm_route.'" data-toggle="collapse" class="collapsed" '.$Active.'>';
-                $nav .= '<i class="'.$Routes->icon.'"></i><span>'.$Routes->nm_route.'</span><i class="icon-submenu lnr lnr-chevron-left"></i>';
+                $nav .= "\r".'<li '.$Active.'>';
+                $nav .= '<a href="#'.$Routes->nm_route.'">';
+                $nav .= '<i class="'.$Routes->icon.'"></i><span>'.$Routes->nm_route.'</span>';
                 // $nav .= '<span>'.$Routes->nm_route.'</span>';
                 // $nav .= '<i class="icon-submenu lnr lnr-chevron-left"></i>';
                 $nav .= '</a>';
-                $nav .= '<div id="'.$Routes->nm_route.'" class="collapse">';
-                $nav .= '<ul class="nav">';
-                $nav .= '<li><a href="'.url($urlMenu).'" '.$Active.'>';
-                $nav .= '<i class="'.$Routes->icon.'"></i>List '.$Routes->nm_route.'</a></li>';
+                $nav .= '<ul>';
+                // $nav .= '<li><a href="'.url($urlMenu).'" '.$Active.'>';
+                // $nav .= '<i class="'.$Routes->icon.'"></i>List '.$Routes->nm_route.'</a></li>';
                 foreach($Routes->children as $subRoutes){
                     // Check jika sub menu tidak terdaftar di Role ID
                     if(in_array($subRoutes->id, $roleId) && ($subRoutes->active) == 1):
                         $urlMenuParent = $prefix.$Routes->alias_route.'/'.$subRoutes->alias_route;
-                        $subActive     = ( Larapix::Routes() == $subRoutes->alias_route ) ? 'class="active"' : '';
-                        $nav .='<li><a href="'.url($urlMenuParent).'" '.$subActive.'><i class="'.$subRoutes->icon.'"></i>'.$subRoutes->nm_route.'</a></li>';
+                        $subActive     = ( Larapix::routeIsExists() == $subRoutes->alias_route ) ? 'class="active"' : '';
+                        $nav .='<li '.$subActive.'><a href="'.url($urlMenuParent).'"><i class="'.$subRoutes->icon.'"></i>'.$subRoutes->nm_route.'</a></li>';
                     endif;
 
                 }
 
                 $nav .= '</ul>';
-                $nav .= '</div>';
                 $nav .= '</li>';
             else :
-                $nav .= "\r\t\t\t".'<li>
-                <a '.$Active.' href="'.url($urlMenu).'">
+                $nav .= "\r\t\t\t".'<li '.$Active.'>
+                <a href="'.url($urlMenu).'">
                 <i class="'.$Routes->icon.'"></i>
                 <span>'.$Routes->nm_route.'</span>
                 </a>
@@ -83,26 +81,26 @@ trait MenuNavigation{
         $nav  = '';
         foreach($menu as $Routes){
             $urlMenu  = $prefix.''.$Routes->alias_route;
-            $Active   = ( Larapix::Routes() == $Routes->alias_route ) ? 'class="active"' : '';
+            $Active   = ( Larapix::routeIsExists() == $Routes->alias_route ) ? 'class="active"' : '';
             if($Routes->children->count() > 0):
                 $nav .= "\r\t\t\t".'<li>
                 <a href="'.url($urlMenu).'"><i class="'.$Routes->icon.'"></i>
                 <span>'.$Routes->nm_route.'</span></a>
                 <ul>';
-                $nav .='<li><a href="'.url($urlMenu).'" '.$Active.'>'.$Routes->nm_route.'</a></li>';
+                $nav .='<li '.$Active.'><a href="'.url($urlMenu).'">'.$Routes->nm_route.'</a></li>';
                 foreach($Routes->children as $subRoutes){
 
                     if(in_array($subRoutes->id, $roleId) && ($subRoutes->active) == 1):
                         $urlMenuParent = $prefix.$Routes->alias_route.'/'.$subRoutes->alias_route;
-                        $subActive     = ( Larapix::Routes() == $subRoutes->alias_route ) ? 'class="active"' : '';
+                        $subActive     = ( Larapix::routeIsExists() == $subRoutes->alias_route ) ? 'class="active"' : '';
                         $nav          .='<li><a href="'.url($urlMenuParent).'" '.$subActive.'><i class="'.$subRoutes->icon.'"></i>'.$subRoutes->nm_route.'</a></li>';
                     endif;
 
                 }
                 $nav .='</ul></li>';
             else :
-                $nav .= "\r\t\t\t".'<li>
-                <a '.$Active.' href="'.url($urlMenu).'">
+                $nav .= "\r\t\t\t".'<li '.$Active.'>
+                <a href="'.url($urlMenu).'">
                 <i class="'.$Routes->icon.'"></i>
                 <span>'.$Routes->nm_route.'</span>
                 </a>
