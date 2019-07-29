@@ -25,7 +25,8 @@ class Larapix
 
     public static function titleHeader(){
         $getRoute    = explode('/', self::getURI());
-        $getMenu     = Routes::where('alias_route', self::routeIsExists() )->first();
+        // $getMenu     = Routes::select(['id'])->where('alias_route', self::routeIsExists() )->count();
+        $getMenu    = self::routeIsExists();
         if(in_array('{id}', $getRoute)):
             $arr      = array_pop($getRoute);
             $endRoute = end($getRoute);
@@ -45,7 +46,7 @@ class Larapix
         else:
             $endRoute  = end($getRoute);
         endif;
-        $getMenu   = Routes::where('alias_route','=', $endRoute )->first();
+        // $getMenu   = Routes::where('alias_route','=', $endRoute )->first();
         $count     = count($getRoute);
 
         echo '';
@@ -63,7 +64,7 @@ class Larapix
         else:
             $endRoute   = end($getRoute);
         endif;
-        $getMenu   = Routes::where('alias_route', $endRoute )->first();
+        // $getMenu   = Routes::where('alias_route', $endRoute )->first();
         $count     = count($getRoute);
         $breadcrumb = '<'.$tag.' class="breadcrumb">';
         for($i=0; $i<$count; $i++){
