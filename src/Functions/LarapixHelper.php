@@ -4,6 +4,7 @@ namespace Larapix\Functions;
 use Request;
 
 use Models\Routes;
+use Symfony\Component\Routing\Route;
 
 trait LarapixHelper{
 
@@ -24,13 +25,14 @@ trait LarapixHelper{
         $URI		= '';
         if ( isset($arr[1]) ) :
             $ROOT	= $arr[1];
-            $route	= Routes::where('alias_route', $ROOT)->first();
-            $parentR= Routes::where('parent_id', $route->id)->count();
-            if ($parentR >= 1):
+            $route	= Routes::with('children')
+                    ->select(['id'])
+                    ->where('alias_route', $ROOT)->first();
+            $countChildren  = $route->children->count();
+            if ( $countChildren >= 1):
                 if ( isset($arr[2]) ):
                     $PARENT = $arr[2];
-                    $check	= Routes::where('alias_route', $PARENT )->first();
-                    $URI    = ($check) ? $PARENT : $ROOT;
+                    $URI    = ( $route->children->count() > 0 ) ? $PARENT : $ROOT;
                 else:
                     $URI = $ROOT;
                 endif;
