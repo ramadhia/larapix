@@ -23,5 +23,7 @@
                 "Larapix\\Providers\\LarapixServiceProvider"
             ]
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
 }
