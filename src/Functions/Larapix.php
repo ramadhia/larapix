@@ -55,22 +55,24 @@ class Larapix
         }
     }
 
-    public static function breadcrumb( $tag = 'ul' ){
+    public static function breadcrumb( $tag = 'ul', $titleBreadcrumb = null ){
         $route     = str_replace('-', ' ', self::getURI());
         $getRoute  = explode('/', $route);
         if(in_array('{id}', $getRoute)):
             $arr        = array_pop($getRoute);
-            $endRoute   = end($getRoute);
+            $endRoute   = ( empty($titleBreadcrumb) ) ? end($getRoute) : $titleBreadcrumb ;
         else:
-            $endRoute   = end($getRoute);
+            $endRoute   = ( empty($titleBreadcrumb) ) ? end($getRoute) : $titleBreadcrumb ;
         endif;
         // $getMenu   = Routes::where('alias_route', $endRoute )->first();
         $count     = count($getRoute);
         $breadcrumb = '<'.$tag.' class="breadcrumb">';
         for($i=0; $i<$count; $i++){
+            $active     = ( $i == ($count-1) ) ? 'class="active"' : '';
             $iconHome   = ( $i == 0 ) ? '<i class="icon-home2 position-left"></i>' : '';
             $named      = ( $i == 0 ) ? 'Beranda' : $getRoute[$i];
-            $breadcrumb .= '<li>'.$iconHome.''.ucfirst($named).'</li>';
+            $named      = ( $i == ($count-1) ) ? $endRoute : $named;
+            $breadcrumb .= '<li '.$active.'>'.$iconHome.''.ucfirst($named).'</li>';
         }
         $breadcrumb .= '</'.$tag.'>';
         return $breadcrumb;
